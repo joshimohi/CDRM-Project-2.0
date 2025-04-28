@@ -20,7 +20,7 @@
 - Follow the on-screen prompts
 
 ## Installation (From binary)
-- Download the latest release from the [releases]([https://cdm-project.com/tpd94/CDRM-Project/releases](https://github.com/TPD94/CDRM-Project-2.0/releases)) page and run the `.exe`
+- Download the latest release from the [releases](https://github.com/TPD94/CDRM-Project-2.0/releases) page and run the `.exe`
 
  ## Installation  (Manual)
  - Open your terminal and navigate to where you'd like to store the application  

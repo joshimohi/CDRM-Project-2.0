@@ -1,0 +1,10 @@
+*.pyc
+*.prd
+*.wvd
+*.db
+.idea/
+configs/config.yaml
+build
+main.spec
+pyinstallericon.ico
+icon.ico

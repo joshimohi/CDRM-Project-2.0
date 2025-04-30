@@ -84,7 +84,8 @@ def is_url_and_split(input_str):
     else:
         return False, None, None
 
-def api_decrypt(pssh:str = None, license_url: str = None, proxy: str = None, headers: str = None, cookies: str = None, json_data: str = None):
+def api_decrypt(pssh:str = None, license_url: str = None, proxy: str = None, headers: str = None, cookies: str = None, json_data: str = None, device: str = 'public', username: str = None):
+    print(f'Using device {device} for user {username}')
     with open(f'{os.getcwd()}/configs/config.yaml', 'r') as file:
         config = yaml.safe_load(file)
     if config['database_type'].lower() == 'sqlite':
@@ -106,19 +107,34 @@ def api_decrypt(pssh:str = None, license_url: str = None, proxy: str = None, hea
                     'message': f'An error occurred processing PSSH\n\n{error}'
                 }
             try:
-                base_name = config["default_pr_cdm"]
-                if not base_name.endswith(".prd"):
-                    base_name += ".prd"
-                    prd_files = glob.glob(f'{os.getcwd()}/configs/CDMs/PR/{base_name}')
+                if device == 'public':
+                    base_name = config["default_pr_cdm"]
+                    if not base_name.endswith(".prd"):
+                        base_name += ".prd"
+                        prd_files = glob.glob(f'{os.getcwd()}/configs/CDMs/PR/{base_name}')
+                    else:
+                        prd_files = glob.glob(f'{os.getcwd()}/configs/CDMs/PR/{base_name}')
+                    if prd_files:
+                        pr_device = playreadyDevice.load(prd_files[0])
+                    else:
+                        return {
+                            'status': 'error',
+                            'message': 'No default .prd file found'
+                        }
                 else:
-                    prd_files = glob.glob(f'{os.getcwd()}/configs/CDMs/PR/{base_name}')
-                if prd_files:
-                    pr_device = playreadyDevice.load(prd_files[0])
-                else:
-                    return {
-                        'status': 'error',
-                        'message': 'No default .prd file found'
-                    }
+                    base_name = device
+                    if not base_name.endswith(".prd"):
+                        base_name += ".prd"
+                        prd_files = glob.glob(f'{os.getcwd()}/configs/CDMs/{username}/PR/{base_name}')
+                    else:
+                        prd_files = glob.glob(f'{os.getcwd()}/configs/CDMs/{username}/PR/{base_name}')
+                    if prd_files:
+                        pr_device = playreadyDevice.load(prd_files[0])
+                    else:
+                        return {
+                            'status': 'error',
+                            'message': f'{base_name} does not exist'
+                        }
             except Exception as error:
                 return {
                     'status': 'error',
@@ -266,19 +282,34 @@ def api_decrypt(pssh:str = None, license_url: str = None, proxy: str = None, hea
                 'message': f'An error occurred processing PSSH\n\n{error}'
             }
         try:
-            base_name = config["default_wv_cdm"]
-            if not base_name.endswith(".wvd"):
-                base_name += ".wvd"
-                wvd_files = glob.glob(f'{os.getcwd()}/configs/CDMs/WV/{base_name}')
+            if device == 'public':
+                base_name = config["default_wv_cdm"]
+                if not base_name.endswith(".wvd"):
+                    base_name += ".wvd"
+                    wvd_files = glob.glob(f'{os.getcwd()}/configs/CDMs/WV/{base_name}')
+                else:
+                    wvd_files = glob.glob(f'{os.getcwd()}/configs/CDMs/WV/{base_name}')
+                if wvd_files:
+                    wv_device = widevineDevice.load(wvd_files[0])
+                else:
+                    return {
+                        'status': 'error',
+                        'message': 'No default .wvd file found'
+                    }
             else:
-                wvd_files = glob.glob(f'{os.getcwd()}/configs/CDMs/WV/{base_name}')
-            if wvd_files:
-                wv_device = widevineDevice.load(wvd_files[0])
-            else:
-                return {
-                    'status': 'error',
-                    'message': 'No default .wvd file found'
-                }
+                base_name = device
+                if not base_name.endswith(".wvd"):
+                    base_name += ".wvd"
+                    wvd_files = glob.glob(f'{os.getcwd()}/configs/CDMs/{username}/WV/{base_name}')
+                else:
+                    wvd_files = glob.glob(f'{os.getcwd()}/configs/CDMs/{username}/WV/{base_name}')
+                if wvd_files:
+                    wv_device = widevineDevice.load(wvd_files[0])
+                else:
+                    return {
+                        'status': 'error',
+                        'message': f'{base_name} does not exist'
+                    }
         except Exception as error:
             return {
                 'status': 'error',

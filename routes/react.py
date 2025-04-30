@@ -26,7 +26,7 @@ def index(path=''):
         file_path = os.path.join(react_bp.static_folder, path)
         if path != "" and os.path.exists(file_path):
             return send_from_directory(react_bp.static_folder, path)
-        elif path.lower() in ['', 'cache', 'api', 'testplayer']:
+        elif path.lower() in ['', 'cache', 'api', 'testplayer', 'account']:
             data = index_tags.tags.get(path.lower(), index_tags.tags['index'])
             return render_template('index.html', data=data)
         else:

@@ -7,6 +7,7 @@ def check_for_config_file():
         default_config = """\
 default_wv_cdm: ''
 default_pr_cdm: ''
+secret_key_flask: 'secretkey'
 # change the type to mariadb to use mariadb below
 database_type: 'sqlite'
 fqdn: ''

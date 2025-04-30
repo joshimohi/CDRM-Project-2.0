@@ -14,6 +14,13 @@ def check_for_sqlite_database():
         else:
             return
 
+def check_for_user_database():
+    if os.path.exists(f'{os.getcwd()}/databases/users.db'):
+        return
+    else:
+        from custom_functions.database.user_db import create_user_database
+        create_user_database()
+
 def check_for_mariadb_database():
     with open(f'{os.getcwd()}/configs/config.yaml', 'r') as file:
         config = yaml.safe_load(file)
@@ -27,3 +34,4 @@ def check_for_mariadb_database():
 def check_for_sql_database():
     check_for_sqlite_database()
     check_for_mariadb_database()
+    check_for_user_database()

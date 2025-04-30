@@ -1,8 +1,9 @@
 import os
 import sqlite3
-from flask import Blueprint, jsonify, request, send_file
+from flask import Blueprint, jsonify, request, send_file, session
 import json
 from custom_functions.decrypt.api_decrypt import api_decrypt
+from custom_functions.user_checks.device_allowed import user_allowed_to_use_device
 import shutil
 import math
 import yaml
@@ -219,12 +220,27 @@ def decrypt_data():
         api_request_cookies = None
     if 'data' in api_request_data:
         if api_request_data['data'] == '':
-            api_request_data = None
+            api_request_data_func = None
         else:
-            api_request_data = api_request_data['data']
+            api_request_data_func = api_request_data['data']
+    else: api_request_data_func = None
+    if 'device' in api_request_data:
+        if api_request_data['device'] == 'default' or api_request_data['device'] == 'CDRM-Project Public Widevine CDM' or api_request_data['device'] == 'CDRM-Project Public PlayReady CDM':
+            api_request_device = 'public'
+        else:
+            api_request_device = api_request_data['device']
     else:
-        api_request_data = None
-    result = api_decrypt(pssh=api_request_pssh, proxy=api_request_proxy, license_url=api_request_licurl, headers=api_request_headers, cookies=api_request_cookies, json_data=api_request_data)
+        api_request_device = 'public'
+    username = None
+    if api_request_device != 'public':
+        username = session.get('username')
+        if not username:
+            return jsonify({'message': 'Not logged in, not allowed'}), 400
+        if user_allowed_to_use_device(device=api_request_device, username=username):
+            api_request_device = api_request_device
+        else:
+            return jsonify({'message': f'Not authorized / Not found'}), 403
+    result = api_decrypt(pssh=api_request_pssh, proxy=api_request_proxy, license_url=api_request_licurl, headers=api_request_headers, cookies=api_request_cookies, json_data=api_request_data_func, device=api_request_device, username=username)
     if result['status'] == 'success':
         return jsonify({
             'status': 'success',

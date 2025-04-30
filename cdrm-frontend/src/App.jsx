@@ -6,6 +6,7 @@ import TestPlayer from "./components/Pages/TestPlayer";
 import NavBar from "./components/NavBar";
 import NavBarMain from "./components/NavBarMain";
 import SideMenu from "./components/SideMenu"; // Add this import
+import Account from "./components/Pages/Account";
 import { Routes, Route } from "react-router-dom";
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
             <Route path="/cache" element={<Cache />} />
             <Route path="/api" element={<API />} />
             <Route path="/testplayer" element={<TestPlayer />} />
+            <Route path="/account" element={<Account />} />
           </Routes>
         </div>
       </div>

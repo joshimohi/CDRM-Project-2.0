@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { readTextFromClipboard } from '../Functions/ParseChallenge'
+import { readTextFromClipboard } from '../Functions/ParseChallenge';
 import { Helmet } from 'react-helmet'; // Import Helmet
 
 function HomePage() {
@@ -11,6 +11,8 @@ function HomePage() {
   const [data, setData] = useState('');
   const [message, setMessage] = useState('');
   const [isVisible, setIsVisible] = useState(false);
+  const [devices, setDevices] = useState([]);
+  const [selectedDevice, setSelectedDevice] = useState('default');
 
   const bottomRef = useRef(null);
   const messageRef = useRef(null); // Reference to result container
@@ -41,7 +43,8 @@ function HomePage() {
         proxy: proxy,
         headers: headers,
         cookies: cookies,
-        data: data
+        data: data,
+        device: selectedDevice, // Include selected device in the request
       }),
     })
       .then(response => response.json())
@@ -67,7 +70,6 @@ function HomePage() {
       });
     }
   };
-  
 
   const handleFetchPaste = () => {
     event.preventDefault();
@@ -79,13 +81,50 @@ function HomePage() {
     }).catch(err => {
       alert('Failed to paste from fetch!');
     });
-  }
+  };
 
   useEffect(() => {
     if (isVisible && bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [message, isVisible]);
+
+  useEffect(() => {
+    fetch('/login/status', {
+      method: 'POST',
+    })
+      .then(res => res.json())
+      .then(statusData => {
+        if (statusData.message === 'True') {
+          return fetch('/userinfo', { method: 'POST' });
+        } else {
+          throw new Error('Not logged in');
+        }
+      })
+      .then(res => res.json())
+      .then(deviceData => {
+        const combinedDevices = [
+          ...deviceData.Widevine_Devices,
+          ...deviceData.Playready_Devices,
+        ];
+
+        // Add default devices if logged in
+        const allDevices = [
+          "CDRM-Project Public Widevine CDM", 
+          "CDRM-Project Public PlayReady CDM",
+          ...combinedDevices,
+        ];
+
+        // Set devices and select a device if logged in
+        setDevices(allDevices.length > 0 ? allDevices : []);
+        setSelectedDevice(allDevices.length > 0 ? allDevices[0] : 'default');
+      })
+      .catch(() => {
+        // User isn't logged in, set default device to 'default'
+        setDevices([]); // Don't display devices list
+        setSelectedDevice('default');
+      });
+  }, []);
 
   return (
     <>
@@ -139,6 +178,23 @@ function HomePage() {
             value={data}
             onChange={(e) => setData(e.target.value)}
           />
+
+          {/* Device Selection Dropdown, only show if logged in */}
+          {devices.length > 0 && (
+            <>
+              <label htmlFor="device" className="text-white w-8/10 self-center">Select Device:</label>
+              <select
+                id="device"
+                className="w-8/10 border-2 border-sky-500/25 rounded-xl h-10 self-center m-2 text-white bg-black p-1"
+                value={selectedDevice}
+                onChange={(e) => setSelectedDevice(e.target.value)}
+              >
+                {devices.map((device, index) => (
+                  <option key={index} value={device}>{device}</option>
+                ))}
+              </select>
+            </>
+          )}
 
           <div className="flex flex-col lg:flex-row w-full self-center mt-5 items-center lg:justify-around lg:items-stretch">
             <button

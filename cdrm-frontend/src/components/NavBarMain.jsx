@@ -11,8 +11,9 @@ function NavBarMain({ setIsMenuOpen }) {
       <button className="w-24 p-4" onClick={handleMenuToggle}>
         <img src={hamburgerIcon} alt="Menu" className="w-full h-full cursor-pointer" />
       </button>
-      <p className="grow text-white md:text-2xl font-bold text-center flex items-center justify-center p-4">
-        CDRM-Project
+      <p className="grow text-white md:text-2xl font-bold text-center flex flex-col items-center justify-center p-4">
+        CDRM-Project<br />
+        <span className="text-sm">Github Edition</span>
       </p>
       <div className="w-24 p-4"></div>
     </div>

@@ -4,8 +4,8 @@ tags = {
         'keywords': 'CDRM, Widevine, PlayReady, DRM, Decrypt, CDM, CDM-Project, CDRM-Project, TPD94, Decryption',
         'opengraph_title': 'CDRM-Project',
         'opengraph_description': 'Self Hosted web application written in Python/JavaScript utilizing the Flask/Tailwind Framework and ReactJS library to decrypt Widevine & Playready content',
-        'opengraph_image': 'https://cdrm-project.com/og-home.jpg',
-        'opengraph_url': 'https://cdm-project.com/tpd94/cdrm-project',
+        'opengraph_image': '',
+        'opengraph_url': '',
         'tab_title': 'CDRM-Project',
     },
     'cache': {
@@ -13,8 +13,8 @@ tags = {
         'keywords': 'Cache, Vault, Widevine, PlayReady, DRM, Decryption, CDM, CDRM-Project, CDRM-Project, TPD94, Decryption',
         'opengraph_title': 'Search the Cache',
         'opengraph_description': 'Search the cache by KID or PSSH for decryption keys',
-        'opengraph_image': 'https://cdrm-project.com/og-cache.jpg',
-        'opengraph_url': 'https://cdrm-project.com/cache',
+        'opengraph_image': '',
+        'opengraph_url': '',
         'tab_title': 'Cache',
     },
     'testplayer': {
@@ -22,8 +22,8 @@ tags = {
         'keywords': 'Shaka, Player, DRM, CDRM, CDM, CDRM-Project, TPD94, Decryption, CDM-Project, KID, KEY',
         'opengraph_title': 'Test Player',
         'opengraph_description': 'Shaka Player for testing decryption keys',
-        'opengraph_image': 'https://cdrm-project.com/og-testplayer.jpg',
-        'opengraph_url': 'https://cdrm-project.com/testplayer',
+        'opengraph_image': '',
+        'opengraph_url': '',
         'tab_title': 'Test Player',
     },
     'api': {
@@ -31,8 +31,8 @@ tags = {
         'keywords': 'API, python, requests, send, remotecdm, remote, cdm, CDM-Project, CDRM-Project, TPD94, Decryption, DRM, Web, Vault',
         'opengraph_title': 'API',
         'opengraph_description': 'Documentation for the program "CDRM-Project"',
-        'opengraph_image': 'https://cdrm-project.com/og-api.jpg',
-        'opengraph_url': 'https://cdrm-project.com/api',
+        'opengraph_image': '',
+        'opengraph_url': '',
         'tab_title': 'API',
     },
     'account': {
@@ -40,8 +40,8 @@ tags = {
         'keywords': 'Login, CDRM, CDM, CDRM-Project, register, account',
         'opengraph_title': 'My account',
         'opengraph_description': 'Account for CDRM-Project',
-        'opengraph_image': 'https://cdrm-project.com/og-home.jpg',
-        'opengraph_url': 'https://cdrm-project.com/account',
+        'opengraph_image': '',
+        'opengraph_url': '',
         'tab_title': 'My account',
     }
 }

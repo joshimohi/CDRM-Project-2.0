@@ -28,7 +28,7 @@ function NavBar() {
             {/* Header */}
             <div>
                 <p className="text-white text-2xl font-bold p-3 text-center mb-5">
-                    <a href="/">CDRM-Project</a><br /><span className="text-sm">Github Edition</span>
+                    <a href="/">CDRM-Project</a>
                 </p>
             </div>
 

@@ -5,6 +5,8 @@ from pyplayready.device import Device as PlayReadyDevice
 from pyplayready.cdm import Cdm as PlayReadyCDM
 from pyplayready import PSSH as PlayReadyPSSH
 from pyplayready.exceptions import (InvalidSession, TooManySessions, InvalidLicense, InvalidPssh)
+from custom_functions.database.user_db import fetch_username_by_api_key
+from custom_functions.user_checks.device_allowed import user_allowed_to_use_device
 
 
 
@@ -53,148 +55,169 @@ def remote_cdm_playready_open(device):
                 }
             }
         })
+    if request.headers['X-Secret-Key'] and str(device).lower() != config['default_pr_cdm'].lower():
+        api_key = request.headers['X-Secret-Key']
+        user = fetch_username_by_api_key(api_key=api_key)
+        if user:
+            if user_allowed_to_use_device(device=device, username=user):
+                pr_device = PlayReadyDevice.load(f'{os.getcwd()}/configs/CDMs/{user}/PR/{device}.prd')
+                cdm = current_app.config['CDM'] = PlayReadyCDM.from_device(pr_device)
+                session_id = cdm.open()
+                return jsonify({
+                    'message': 'Success',
+                    'data': {
+                        'session_id': session_id.hex(),
+                        'device': {
+                            'security_level': cdm.security_level
+                        }
+                    }
+                })
+            else:
+                return jsonify({
+                    'message': f"Device '{device}' is not found or you are not authorized to use it.",
+                }), 403
+        else:
+            return jsonify({
+                'message': f"Device '{device}' is not found or you are not authorized to use it.",
+            }), 403
+    else:
+        return jsonify({
+            'message': f"Device '{device}' is not found or you are not authorized to use it.",
+        }), 403
 
 @remotecdm_pr_bp.route('/remotecdm/playready/<device>/close/<session_id>', methods=['GET'])
 def remote_cdm_playready_close(device, session_id):
-    if str(device).lower() == config['default_pr_cdm'].lower():
+    try:
         session_id = bytes.fromhex(session_id)
         cdm = current_app.config["CDM"]
         if not cdm:
             return jsonify({
-                'status': 400,
                 'message': f'No CDM for "{device}" has been opened yet. No session to close'
-            })
+            }), 400
         try:
             cdm.close(session_id)
         except InvalidSession:
             return jsonify({
-                'status': 400,
                 'message': f'Invalid session ID "{session_id.hex()}", it may have expired'
-            })
+            }), 400
         return jsonify({
-            'status': 200,
             'message': f'Successfully closed Session "{session_id.hex()}".',
-        })
-    else:
+        }), 200
+    except Exception as e:
         return jsonify({
-            'status': 400,
-            'message': f'Unauthorized'
-        })
+            'message': f'Failed to close Session "{session_id.hex()}".'
+        }), 400
 
 @remotecdm_pr_bp.route('/remotecdm/playready/<device>/get_license_challenge', methods=['POST'])
 def remote_cdm_playready_get_license_challenge(device):
-    if str(device).lower() == config['default_pr_cdm'].lower():
-        body = request.get_json()
-        for required_field in ("session_id", "init_data"):
-            if not body.get(required_field):
-                return jsonify({
-                    'status': 400,
-                    'message': f'Missing required field "{required_field}" in JSON body'
-                })
-        cdm = current_app.config["CDM"]
-        session_id = bytes.fromhex(body["session_id"])
-        init_data = body["init_data"]
-        if not init_data.startswith("<WRMHEADER"):
-            try:
-                pssh = PlayReadyPSSH(init_data)
-                if pssh.wrm_headers:
-                    init_data = pssh.wrm_headers[0]
-            except InvalidPssh as e:
-                return jsonify({
-                    'message': f'Unable to parse base64 PSSH, {e}'
-                })
+    body = request.get_json()
+    for required_field in ("session_id", "init_data"):
+        if not body.get(required_field):
+            return jsonify({
+                'message': f'Missing required field "{required_field}" in JSON body'
+            }), 400
+    cdm = current_app.config["CDM"]
+    session_id = bytes.fromhex(body["session_id"])
+    init_data = body["init_data"]
+    if not init_data.startswith("<WRMHEADER"):
         try:
-            license_request = cdm.get_license_challenge(
-                session_id=session_id,
-                wrm_header=init_data
-            )
-        except InvalidSession:
+            pssh = PlayReadyPSSH(init_data)
+            if pssh.wrm_headers:
+                init_data = pssh.wrm_headers[0]
+        except InvalidPssh as e:
             return jsonify({
-                'message': f"Invalid Session ID '{session_id.hex()}', it may have expired."
+                'message': f'Unable to parse base64 PSSH, {e}'
             })
-        except Exception as e:
-            return jsonify({
-                'message': f'Error, {e}'
-            })
+    try:
+        license_request = cdm.get_license_challenge(
+            session_id=session_id,
+            wrm_header=init_data
+        )
+    except InvalidSession:
         return jsonify({
-            'message': 'success',
-            'data': {
-                'challenge': license_request
-            }
+            'message': f"Invalid Session ID '{session_id.hex()}', it may have expired."
         })
+    except Exception as e:
+        return jsonify({
+            'message': f'Error, {e}'
+        })
+    return jsonify({
+        'message': 'success',
+        'data': {
+            'challenge': license_request
+        }
+    })
 
 @remotecdm_pr_bp.route('/remotecdm/playready/<device>/parse_license', methods=['POST'])
 def remote_cdm_playready_parse_license(device):
-    if str(device).lower() == config['default_pr_cdm'].lower():
-        body = request.get_json()
-        for required_field in ("license_message", "session_id"):
-            if not body.get(required_field):
-                return jsonify({
-                    'message': f'Missing required field "{required_field}" in JSON body'
-                })
-        cdm = current_app.config["CDM"]
-        if not cdm:
+    body = request.get_json()
+    for required_field in ("license_message", "session_id"):
+        if not body.get(required_field):
             return jsonify({
-                'message': f"No Cdm session for {device} has been opened yet. No session to use."
+                'message': f'Missing required field "{required_field}" in JSON body'
             })
-        session_id = bytes.fromhex(body["session_id"])
-        license_message = body["license_message"]
-        try:
-            cdm.parse_license(session_id, license_message)
-        except InvalidSession:
-            return jsonify({
-                'message': f"Invalid Session ID '{session_id.hex()}', it may have expired."
-            })
-        except InvalidLicense as e:
-            return jsonify({
-                'message': f"Invalid License, {e}"
-            })
-        except Exception as e:
-            return jsonify({
-                'message': f"Error, {e}"
-            })
+    cdm = current_app.config["CDM"]
+    if not cdm:
         return jsonify({
-            'message': 'Successfully parsed and loaded the Keys from the License message'
+            'message': f"No Cdm session for {device} has been opened yet. No session to use."
         })
+    session_id = bytes.fromhex(body["session_id"])
+    license_message = body["license_message"]
+    try:
+        cdm.parse_license(session_id, license_message)
+    except InvalidSession:
+        return jsonify({
+            'message': f"Invalid Session ID '{session_id.hex()}', it may have expired."
+        })
+    except InvalidLicense as e:
+        return jsonify({
+            'message': f"Invalid License, {e}"
+        })
+    except Exception as e:
+        return jsonify({
+            'message': f"Error, {e}"
+        })
+    return jsonify({
+        'message': 'Successfully parsed and loaded the Keys from the License message'
+    })
 
 @remotecdm_pr_bp.route('/remotecdm/playready/<device>/get_keys', methods=['POST'])
 def remote_cdm_playready_get_keys(device):
-    if str(device).lower() == config['default_pr_cdm'].lower():
-        body = request.get_json()
-        for required_field in ("session_id",):
-            if not body.get(required_field):
-                return jsonify({
-                    'message': f'Missing required field "{required_field}" in JSON body'
-                })
-        session_id = bytes.fromhex(body["session_id"])
-        cdm = current_app.config["CDM"]
-        if not cdm:
+    body = request.get_json()
+    for required_field in ("session_id",):
+        if not body.get(required_field):
             return jsonify({
-                'message': f"Missing required field '{required_field}' in JSON body."
+                'message': f'Missing required field "{required_field}" in JSON body'
             })
-        try:
-            keys = cdm.get_keys(session_id)
-        except InvalidSession:
-            return jsonify({
-                'message': f"Invalid Session ID '{session_id.hex()}', it may have expired."
-            })
-        except Exception as e:
-            return jsonify({
-                'message': f"Error, {e}"
-            })
-        keys_json = [
-            {
-                "key_id": key.key_id.hex,
-                "key": key.key.hex(),
-                "type": key.key_type.value,
-                "cipher_type": key.cipher_type.value,
-                "key_length": key.key_length,
-            }
-            for key in keys
-        ]
+    session_id = bytes.fromhex(body["session_id"])
+    cdm = current_app.config["CDM"]
+    if not cdm:
         return jsonify({
-            'message': 'success',
-            'data': {
-                'keys': keys_json
-            }
+            'message': f"Missing required field '{required_field}' in JSON body."
         })
+    try:
+        keys = cdm.get_keys(session_id)
+    except InvalidSession:
+        return jsonify({
+            'message': f"Invalid Session ID '{session_id.hex()}', it may have expired."
+        })
+    except Exception as e:
+        return jsonify({
+            'message': f"Error, {e}"
+        })
+    keys_json = [
+        {
+            "key_id": key.key_id.hex,
+            "key": key.key.hex(),
+            "type": key.key_type.value,
+            "cipher_type": key.cipher_type.value,
+            "key_length": key.key_length,
+        }
+        for key in keys
+    ]
+    return jsonify({
+        'message': 'success',
+        'data': {
+            'keys': keys_json
+        }
+    })

@@ -5,7 +5,20 @@ function Register() {
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState('');
 
+  // Validation functions
+  const validateUsername = (name) => /^[A-Za-z0-9_-]+$/.test(name);
+  const validatePassword = (pass) => /^\S+$/.test(pass); // No spaces
+
   const handleRegister = async () => {
+    if (!validateUsername(username)) {
+      setStatus("Invalid username. Use only letters, numbers, hyphens, or underscores.");
+      return;
+    }
+    if (!validatePassword(password)) {
+      setStatus("Invalid password. Spaces are not allowed.");
+      return;
+    }
+
     try {
       const response = await fetch('/register', {
         method: 'POST',
@@ -26,6 +39,15 @@ function Register() {
   };
 
   const handleLogin = async () => {
+    if (!validateUsername(username)) {
+      setStatus("Invalid username. Use only letters, numbers, hyphens, or underscores.");
+      return;
+    }
+    if (!validatePassword(password)) {
+      setStatus("Invalid password. Spaces are not allowed.");
+      return;
+    }
+
     try {
       const response = await fetch('/login', {
         method: 'POST',

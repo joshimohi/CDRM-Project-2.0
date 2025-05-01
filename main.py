@@ -12,6 +12,7 @@ from routes.upload import upload_bp
 from routes.user_info import user_info_bp
 from routes.register import register_bp
 from routes.login import login_bp
+from routes.user_changes import user_change_bp
 import os
 import yaml
 app = Flask(__name__)
@@ -30,6 +31,7 @@ app.register_blueprint(user_info_bp)
 app.register_blueprint(upload_bp)
 app.register_blueprint(remotecdm_wv_bp)
 app.register_blueprint(remotecdm_pr_bp)
+app.register_blueprint(user_change_bp)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

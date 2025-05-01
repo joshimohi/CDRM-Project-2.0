@@ -7,7 +7,7 @@ import testPlayerIcon from '../assets/icons/testplayer.svg';
 import accountIcon from '../assets/icons/account.svg'; 
 import discordIcon from '../assets/icons/discord.svg';
 import telegramIcon from '../assets/icons/telegram.svg';
-import giteaIcon from '../assets/icons/gitea.svg';
+import gitHubIcon from '../assets/icons/github.svg';
 
 function NavBar() {
     const [externalLinks, setExternalLinks] = useState({
@@ -153,7 +153,7 @@ function NavBar() {
                     rel="noopener noreferrer"
                     className="w-1/3 p-3 flex flex-col items-center justify-center cursor-pointer hover:bg-green-700 group"
                 >
-                    <img src={giteaIcon} alt="Gitea" className="w-1/2 group-hover:animate-bounce" />
+                    <img src={gitHubIcon} alt="Github" className="w-1/2 group-hover:animate-bounce" />
                 </a>
             </div>
         </div>

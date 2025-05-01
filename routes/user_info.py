@@ -13,7 +13,7 @@ def user_info():
         return jsonify({'message': 'False'}), 400
 
     try:
-        base_path = os.path.join(os.getcwd(), 'configs', 'CDMs', username)
+        base_path = os.path.join(os.getcwd(), 'configs', 'CDMs', username.lower())
         pr_files = [os.path.basename(f) for f in glob.glob(os.path.join(base_path, 'PR', '*.prd'))]
         wv_files = [os.path.basename(f) for f in glob.glob(os.path.join(base_path, 'WV', '*.wvd'))]
 

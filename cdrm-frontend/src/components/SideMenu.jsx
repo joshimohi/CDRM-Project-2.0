@@ -8,7 +8,7 @@ import testPlayerIcon from '../assets/icons/testplayer.svg';
 import accountIcon from '../assets/icons/account.svg'; 
 import discordIcon from '../assets/icons/discord.svg';
 import telegramIcon from '../assets/icons/telegram.svg';
-import giteaIcon from '../assets/icons/gitea.svg';
+import gitHubIcon from '../assets/icons/github.svg';
 
 function SideMenu({ isMenuOpen, setIsMenuOpen }) {
   const [externalLinks, setExternalLinks] = useState({
@@ -165,8 +165,8 @@ function SideMenu({ isMenuOpen, setIsMenuOpen }) {
             className="w-1/3 h-full flex items-center justify-center hover:bg-green-700 group"
           >
             <img
-              src={giteaIcon}
-              alt="Gitea"
+              src={gitHubIcon}
+              alt="Github"
               className="w-full h-2/3 p-1 cursor-pointer group-hover:animate-bounce"
             />
           </a>

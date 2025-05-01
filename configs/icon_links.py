@@ -1,5 +1,5 @@
 data = {
     'discord': '#',
     'telegram': '#',
-    'gitea': '#'
+    'gitea': 'https://github.com/tpd94/cdrm-project-2.0'
 }

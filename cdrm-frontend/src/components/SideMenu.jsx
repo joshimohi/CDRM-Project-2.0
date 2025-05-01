@@ -35,8 +35,9 @@ function SideMenu({ isMenuOpen, setIsMenuOpen }) {
         {/* Header */}
         <div className="h-16 w-full border-b-2 border-white/5 flex flex-row">
           <div className="w-1/4 h-full"></div>
-          <p className="grow text-white md:text-2xl font-bold text-center flex items-center justify-center p-4">
-            CDRM-Project
+          <p className="grow text-white md:text-2xl font-bold text-center flex items-center justify-center p-4 flex-col">
+            CDRM-Project<br />
+            <span className="text-sm">Github Edition</span>
           </p>
           <div className="w-1/4 h-full">
             <button
